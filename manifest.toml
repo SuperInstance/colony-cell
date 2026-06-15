@@ -1,0 +1,91 @@
+# Fleet Colony — Cellular Agent System
+# Each cell is an isolated Rust binary that reads state, executes, writes results, and exits.
+# The mayor binary reads this manifest and spawns due cells.
+
+colony_name = "oracle2-fleet"
+version = "0.2.0"
+
+# Cell binary: sandbox wrapper (bwrap isolation + timeout)
+# Falls back to direct binary if bwrap isn't available
+cell_binary = "/home/ubuntu/.openclaw/workspace/colony/cell-sandbox.sh"
+
+default_timeout_secs = 30
+
+# ── Cell Registry ──────────────────────────────────────────────
+# Each cell has:
+#   id           — unique name, maps to colony/cell-{id}/ directory
+#   enabled      — true/false
+#   schedule     — "every Nmin/h", "hourly", "daily", etc.
+#   timeout_secs — optional override of default
+#   description  — what this cell does
+
+[[cells]]
+id = "gc-warden"
+enabled = true
+schedule = "every 10min"
+timeout_secs = 15
+description = "Read conservation meter, check disk %, propose GC if >80%"
+
+[[cells]]
+id = "bottle-counter"
+enabled = true
+schedule = "every 5min"
+timeout_secs = 10
+description = "Count harbor bottles, report delta from last cycle"
+
+[[cells]]
+id = "pulse-check"
+enabled = true
+schedule = "every 2min"
+timeout_secs = 20
+description = "Ping all 6 fleet services, publish health matrix"
+
+[[cells]]
+id = "logger"
+enabled = true
+schedule = "every 5min"
+timeout_secs = 5
+description = "Read all cell RESULTS.json, aggregate into summary"
+
+[[cells]]
+id = "synthesizer"
+enabled = true
+schedule = "every 10min"
+timeout_secs = 5
+description = "Correlate cell data, detect patterns, flag findings"
+
+[[cells]]
+id = "harvester"
+enabled = true
+schedule = "every 5min"
+timeout_secs = 15
+description = "Sample undelivered harbor bottles, categorize by type/sender"
+
+# ── Culler (culls weak hybrids) ──────────────────────────────
+[[cells]]
+id = "culler"
+enabled = true
+schedule = "every 30min"
+timeout_secs = 10
+description = "Cull hybrid cells that fail to reach Nymph within 5 cycles"
+
+[[cells]]
+id = "synth-squared"
+enabled = true
+schedule = "every 10min"
+timeout_secs = 5
+description = "Hybrid: synthesizer x pulse-squared (deep lineage)"
+
+[[cells]]
+id = "oracle-breeder"
+enabled = true
+schedule = "every 30min"
+timeout_secs = 10
+description = "Scuttler-level breeder — can spawn hybrids on demand"
+
+[[cells]]
+id = "chek-squared"
+enabled = true
+schedule = "every 5min"
+timeout_secs = 5
+description = "2nd-gen hybrid: pulse-check x synth-squared"
